@@ -1,5 +1,5 @@
 # runutil.sh
-##Rundeck API cluster failover bash script.
+## Rundeck API cluster failover bash script.
 
 This is a simple script used to failover a rundeck server from a primary to a secondar
 node. In the event that you wish for the secondary server to take over the schedule
@@ -17,28 +17,28 @@ Once you enter this information in the top of the script, you should be good to 
 
 Usage:
 
-./runutil.sh [failover|stats] $NUM
+`./runutil.sh [failover|stats] $NUM`
 
 "$NUM" is the number of the rundeck server to fail to or to run stats on.
 
 So for example, let's say my server is called time01. I want to failover to time02.
 This would accomplish that:
 
-./runutil.sh failover 2
+`./runutil.sh failover 2`
 
 I will be prompted, asking if I really want this. I will, and all of my scheduled jobs
 will be moved to the second node.
 
 To fail back:
 
-./runutil.sh failover 1
+`./runutil.sh failover 1`
 
 Now they will move back.
 
 'stats' Simply pulls the statistics for that server, such as running info, time up, memory
 usage, and whatnot, from the queried machine.
 
-./runutil.sh stats 1
+`./runutil.sh stats 1`
 
 Gives statistics for time01
 	
