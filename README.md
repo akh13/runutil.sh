@@ -21,7 +21,9 @@ Usage:
 
 "$NUM" is the number of the rundeck server to fail to or to run stats on.
 
-So for example, let's say my server is called time01. I want to failover to time02.
+##failover##
+
+Let's say my primary server is called time01. I want to failover to time02.
 This would accomplish that:
 
 `./runutil.sh failover 2`
@@ -35,10 +37,21 @@ To fail back:
 
 Now they will move back.
 
-'stats' Simply pulls the statistics for that server, such as running info, time up, memory
+##stats##
+
+Simply pulls the statistics for that server, such as running info, time up, memory
 usage, and whatnot, from the queried machine.
 
 `./runutil.sh stats 1`
 
 Gives statistics for time01
 	
+##Other args##
+
+It is now possible to specify a project after choosing the failover target. To only migrate 
+a specific project to a node, specify the name of the project as PROJ. Without this argument, 
+it is assumed that you wish to migrate every job on the cluster, as opposed to just a select 
+subset of jobs. For example, in project "bananacheese" we can fail jobs over to the secondary
+nodee:
+
+`./runutil.sh failover 2 bananacheese`

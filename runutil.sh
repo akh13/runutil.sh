@@ -33,15 +33,20 @@ SERVER2="YOUR SERVER2 NAME HERE"
 ###
 ### Check if we are failing from one to two, or two to one.
 
-if [ $2 == 1 ]
+if [[ $2 == 1 ]]
 then
   SERVER=$SERVER1
   ID=$ID2
-elif [ $2 == 2 ]
+elif [[ $2 == 2 ]]
 then
   SERVER=$SERVER2
   ID=$ID1
 fi
+if [[ ! -z $3 ]]
+then
+  PROJ=$3
+fi
+
 case $1 in
   #Statistics
   stats)
@@ -58,19 +63,45 @@ case $1 in
   failover) while true
     do
       # (1) prompt user, and read command line argument
-      read -p "Failover to $SERVER? (y/n)" answer
+      
+      if [[ -z "$PROJ" ]]
+      then
+        
+        read -p "Failover all jobs to $SERVER? (y/n)" answer
+        
+      else
+        
+        read -p "Failover all jobs in the project named \"$PROJ\" to $SERVER? (y/n)" answer
+        
+      fi
       
       # (2) handle the input we were given
       case $answer in
         [yY]* )
           
-          echo "Okay, failing to $SERVER"
+          if [[ -z "$PROJ" ]]
+          then
+            
+            echo "Okay, failing to $SERVER"
+            
+            curl --insecure \
+            -H "X-RunDeck-Auth-Token:$TOKEN" \
+            -H "Content-Type: application/xml" \
+            --data "<server uuid=\"$ID\"/>" \
+            -X PUT "https://$SERVER.$DOMAIN/api/20/scheduler/takeover"
+            
+          else
+            
+            echo "Okay, failing all jobs in $PROJ to $SERVER"
+            
+            curl --insecure \
+            -H "X-RunDeck-Auth-Token:$TOKEN" \
+            -H "Content-Type: application/xml" \
+            --data "<takeoverSchedule><server uuid=\"$ID\"/><project name=\"$PROJ\"/></takeoverSchedule>" \
+            -X PUT "https://$SERVER.$DOMAIN/api/20/scheduler/takeover"
+            
+          fi
           
-          curl --insecure \
-          -H "X-RunDeck-Auth-Token:$TOKEN" \
-          -H "Content-Type: application/xml" \
-          --data "<server uuid=\"$ID\"/>" \
-          -X PUT "https://$SERVER.$DOMAIN/api/20/scheduler/takeover"
         break;;
         
         [nN]* ) exit;;
@@ -86,7 +117,7 @@ case $1 in
     ### Instructions block.
     ###
     
-    echo "runutil.sh ARG NUM"
+    echo "runutil.sh ARG NUM PROJ"
     echo "----------------------------"
     echo "NUM is the number of the rundeck server to fail to or to run stats on."
     echo ""
@@ -102,6 +133,11 @@ case $1 in
     echo ""
     echo "ex: for stats of $SERVER1, do as follows:"
     echo "./runutil.sh stats 1"
+    echo ""
+    echo "It is now possible to specify a project after choosing the failover target."
+    echo "To only migrate a specific project to a node, specify the name of the project"
+    echo "as PROJ. Without this argument, it is assumed that you wish to migrate every"
+    echo "job on the cluster, as opposed to just a select subset."
     echo "----------------------------"
     
   ;;
